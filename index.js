@@ -1,23 +1,30 @@
-import Web3 from 'web3';
-import address from './address.js';
-import abi from './abi.js';
+global.window = global;
+global.self = global;
+global.location = new URL('https://tokens.cryptopolys.com/');
+global.regeneratorRuntime = {};
+// global.btoa = require('btoa');
+// global.Blob = require('node-blob');
+// global.XMLHttpRequest = require('xhr2');
+
+const Web3 = require('./web3.min.js');
+// const Web3 = require('web3');
+const address = require('./address.js');
+const abi = require('./abi.js');
 
 const infuraProjectId = `4fb939301ec543a0969f3019d74f80c2`;
 
 const web3 = new Web3(
   // Replace YOUR-PROJECT-ID with a Project ID from your Infura Dashboard
-  new Web3.providers.WebsocketProvider("wss://rinkeby.infura.io/ws/v3/${infuraProjectId}")
+  new Web3.providers.HttpProvider(`https://rinkeby.infura.io/v3/${infuraProjectId}`)
 );
 
 const contract = new web3.eth.Contract(abi, address);
+/* const id = 0x1;
+contract.methods.getMetadata(id, 'hash').call().then(console.log); */
 
 addEventListener('fetch', event => {
   event.respondWith(handleRequest(event.request))
-})
-/**
- * Respond with hello worker text
- * @param {Request} request
- */
+});
 async function handleRequest(request) {
   const {pathname} = new URL(request.url);
   const match = pathname.match(/^\/([0-9]+)$/);
