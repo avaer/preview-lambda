@@ -1,13 +1,15 @@
-global.window = global;
+/* global.window = global;
 global.self = global;
 global.location = new URL('https://tokens.cryptopolys.com/');
-global.regeneratorRuntime = {};
+global.regeneratorRuntime = {}; */
 // global.btoa = require('btoa');
 // global.Blob = require('node-blob');
 // global.XMLHttpRequest = require('xhr2');
 
-const Web3 = require('./web3.min.js');
-// const Web3 = require('web3');
+const fetch = require('node-fetch');
+
+// const Web3 = require('./web3.min.js');
+const Web3 = require('web3');
 const address = require('./address.js');
 const abi = require('./abi.js');
 
@@ -22,46 +24,63 @@ const contract = new web3.eth.Contract(abi, address);
 /* const id = 0x1;
 contract.methods.getMetadata(id, 'hash').call().then(console.log); */
 
-addEventListener('fetch', event => {
-  event.respondWith(handleRequest(event.request))
-});
-async function handleRequest(request) {
-  const {pathname} = new URL(request.url);
-  const match = pathname.match(/^\/([0-9]+)$/);
-  const id = parseInt(match[1], 10);
-  if (!isNaN(id)) {
-    const hash = await contract.methods.getMetadata(id, 'hash').call();
+exports.handler = async event => {
+  if (event.pathParameters.id) {
+    // let {id} = event.spec;
+    let {id} = event.pathParameters;
+    id = parseInt(id, 10);
 
-    if (hash) {
-      const proxyRes = await fetch(`https://api.cryptopolys.com/metadata${hash}`);
-      if (proxyRes.ok) {
-        const j = await proxyRes.json();
-        const {objectName, dataHash, screenshotHash} = j;
+    if (!isNaN(id)) {
+      const hash = await contract.methods.getMetadata(id, 'hash').call();
 
-        return new Response(JSON.stringify({
-          "name": objectName,
-          "description": `Token: ${objectName}`,
-          "image": `https://api.cryptopolys.com/data${dataHash}`,
-          "attributes": {
-            // name: objectName,
-            screenshotHash,
-          },
-        }, null, 2), {
-          headers: {
-            'content-type': 'application/json',
-          },
-        });
+      if (hash) {
+        const proxyRes = await fetch(`https://api.cryptopolys.com/metadata${hash}`);
+        if (proxyRes.ok) {
+          const j = await proxyRes.json();
+          const {objectName, dataHash, screenshotHash} = j;
+
+          return {
+            statusCode: 200,
+            headers: {
+              'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: objectName,
+              description: `Token: ${objectName}`,
+              image: `https://api.cryptopolys.com/data${dataHash}`,
+              attributes: {
+                screenshotUrl: `https://api.cryptopolys.com/data${screenshotHash}`,
+              },
+            }, null, 2),
+          };
+        } else {
+          const blob = await proxyRes.blob();
+          return {
+            status: proxyRes.status,
+            body: blob,
+          };
+        }
       } else {
-        return proxyRes;
+        return {
+          statusCode: 404,
+          body: 'no such id',
+        };
       }
     } else {
-      return new Response('not such id', {
-        // headers: { 'content-type': 'text/plain' },
-      });
+      return {
+        statusCode: 404,
+        body: 'not found',
+      };
     }
   } else {
-    return new Response('not found', {
-      // headers: { 'content-type': 'text/plain' },
-    });
+    return {
+      statusCode: 400,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': '*',
+        'Access-Control-Allow-Methods': '*',
+      },
+      body: 'no spec: ' + JSON.stringify(event),
+    };
   }
-}
+};

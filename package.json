@@ -1,22 +1,24 @@
 {
-  "private": true,
-  "name": "polys-worker",
-  "version": "1.0.0",
-  "description": "A template for kick starting a Cloudflare Workers project",
+  "name": "polys-tokens-lambda",
+  "version": "0.0.1",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "format": "prettier --write '**/*.{js,css,json,md}'"
+    "build": "rm -f function.zip && zip -r function.zip * && aws lambda update-function-code --function-name tokens --zip-file fileb://function.zip"
   },
-  "author": "Avaer Kazmer <a@modules.io>",
-  "license": "MIT",
-  "devDependencies": {
-    "prettier": "^1.18.2"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/modulesio/exokit-lambda-token.git"
   },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/modulesio/exokit-lambda-token/issues"
+  },
+  "homepage": "https://github.com/modulesio/exokit-lambda-token#readme",
   "dependencies": {
-    "btoa": "^1.2.1",
-    "node-blob": "0.0.2",
-    "web3": "^1.2.6",
-    "xhr2": "^0.2.0"
+    "node-fetch": "^2.6.0",
+    "web3": "^1.2.1"
   }
 }
