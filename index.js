@@ -25,13 +25,16 @@ const contract = new web3.eth.Contract(abi, address);
 contract.methods.getMetadata(id, 'hash').call().then(console.log); */
 
 exports.handler = async event => {
+  console.log('got req', event.pathParameters.id);
   if (event.pathParameters.id) {
     // let {id} = event.spec;
     let {id} = event.pathParameters;
     id = parseInt(id, 10);
 
     if (!isNaN(id)) {
+      console.log('get hash 1', id);
       const hash = await contract.methods.getMetadata(id, 'hash').call();
+      console.log('get hash 2', id, hash);
 
       if (hash) {
         const proxyRes = await fetch(`https://api.cryptopolys.com/metadata${hash}`);
