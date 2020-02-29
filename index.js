@@ -50,9 +50,9 @@ exports.handler = async event => {
             body: JSON.stringify({
               name: objectName,
               description: `Token: ${objectName}`,
-              image: `https://api.cryptopolys.com/data${dataHash}`,
+              image: `https://api.cryptopolys.com/data${dataHash}.glb`,
               attributes: {
-                screenshotUrl: `https://api.cryptopolys.com/data${screenshotHash}`,
+                screenshotUrl: `https://api.cryptopolys.com/data${screenshotHash}.gif`,
               },
             }, null, 2),
           };
