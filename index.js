@@ -34,10 +34,37 @@ exports.handler = async event => {
   console.log('got event', event);
   let {queryStringParameters: {t}, body, isBase64Encoded} = event;
   if (isBase64Encoded) {
-    body = Buffer.from(body, 'base64');
+    body = Buffer.from(body, 'base64').toString('utf8');
   }
   if (t === 'postMessage') {
     await channel.send(body);
+    /* if (typeof data.text === 'string') {
+      channel.send(data.text);
+    } else if (typeof data.attachment === 'string') {
+      const filename = data.attachment;
+      if (discordAttachmentBuffer) {
+        channel.send(new Discord.Attachment(discordAttachmentBuffer, filename));
+        discordAttachmentBuffer = null;
+      } else {
+        // console.log('prepare for attachment', data.attachment);
+        discordAttachmentSpec = {
+          channel,
+          filename,
+        };
+      } */
+
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': '*',
+        'Access-Control-Allow-Methods': '*',
+      },
+      body: 'ok',
+    };
+  } else if (t === 'postAttachment') {
+    const attachment = new MessageAttachment(body);
+    await channel.send('', attachment);
     /* if (typeof data.text === 'string') {
       channel.send(data.text);
     } else if (typeof data.attachment === 'string') {
