@@ -1,89 +1,89 @@
-/* global.window = global;
-global.self = global;
-global.location = new URL('https://tokens.cryptopolys.com/');
-global.regeneratorRuntime = {}; */
-// global.btoa = require('btoa');
-// global.Blob = require('node-blob');
-// global.XMLHttpRequest = require('xhr2');
+// globalThis.window = globalThis;
+// globalThis.self = globalThis;
 
-const fetch = require('node-fetch');
+// const Discord = require('./discord.12.0.1.min.js');
+const Discord = require('discord.js');
 
-// const Web3 = require('./web3.min.js');
-const Web3 = require('web3');
-const address = require('./address.js');
-const abi = require('./abi.js');
+function parseQuery(queryString) {
+    var query = {};
+    var pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
+    for (var i = 0; i < pairs.length; i++) {
+        var pair = pairs[i].split('=');
+        query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+    }
+    return query;
+}
 
-const infuraProjectId = `4fb939301ec543a0969f3019d74f80c2`;
-
-const web3 = new Web3(
-  // Replace YOUR-PROJECT-ID with a Project ID from your Infura Dashboard
-  new Web3.providers.HttpProvider(`https://rinkeby.infura.io/v3/${infuraProjectId}`)
-);
-
-const contract = new web3.eth.Contract(abi, address);
-/* const id = 0x1;
-contract.methods.getMetadata(id, 'hash').call().then(console.log); */
+const discordConfig = {
+  // clientId: '684141574808272937',
+  // clientSecret: 'b_6lvdbXZGbT3Ruw8VSfQpBIQedTrZZl',
+  token: 'Njg0MTQxNTc0ODA4MjcyOTM3.Xl17oQ.6pixWLMAFR9Gkpd5HtZ8XfB1miM',
+  channelId: '684167488963215364',
+};
+const client = new Discord.Client();
+const readyPromise = client.login(discordConfig.token)
+  /* .then(() => {
+    client.channels.find(channel => {
+      console.log('channel: ' + channel.name);
+    });
+  }); */
 
 exports.handler = async event => {
-  console.log('got req', event.pathParameters.id);
-  if (event.pathParameters.id) {
-    // let {id} = event.spec;
-    let {id} = event.pathParameters;
-    id = parseInt(id, 10);
-
-    if (!isNaN(id)) {
-      console.log('get hash 1', id);
-      const hash = await contract.methods.getMetadata(id, 'hash').call();
-      console.log('get hash 2', id, hash);
-
-      if (hash) {
-        const proxyRes = await fetch(`https://api.cryptopolys.com/metadata${hash}`);
-        if (proxyRes.ok) {
-          const j = await proxyRes.json();
-          const {objectName, dataHash, screenshotHash} = j;
-
-          return {
-            statusCode: 200,
-            headers: {
-              'content-type': 'application/json',
-            },
-            body: JSON.stringify({
-              name: objectName,
-              description: `Token: ${objectName}`,
-              image: `https://api.cryptopolys.com/data${dataHash}.glb`,
-              attributes: {
-                screenshotUrl: `https://api.cryptopolys.com/data${screenshotHash}.gif`,
-              },
-            }, null, 2),
-          };
+  await readyPromise;
+  // const {pathname, search} = new URL(request.url);
+  console.log('got event', event);
+  const {queryStringParameters} = event;
+  const {t, m} = queryStringParameters;
+  if (t === 'post') {
+    // const {m} = parseQuery(search);
+    // const channel = client.channels.find(channel => channel.name === discordConfig.channelId && channel.type === 'text');
+    const channel = await client.channels.fetch(discordConfig.channelId);
+    if (channel) {
+      await channel.send(m);
+      /* if (typeof data.text === 'string') {
+        channel.send(data.text);
+      } else if (typeof data.attachment === 'string') {
+        const filename = data.attachment;
+        if (discordAttachmentBuffer) {
+          channel.send(new Discord.Attachment(discordAttachmentBuffer, filename));
+          discordAttachmentBuffer = null;
         } else {
-          const blob = await proxyRes.blob();
-          return {
-            status: proxyRes.status,
-            body: blob,
+          // console.log('prepare for attachment', data.attachment);
+          discordAttachmentSpec = {
+            channel,
+            filename,
           };
-        }
-      } else {
-        return {
-          statusCode: 404,
-          body: 'no such id',
-        };
-      }
+        } */
+
+      return {
+        statusCode: 200,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': '*',
+          'Access-Control-Allow-Methods': '*',
+        },
+        body: 'ok',
+      };
     } else {
       return {
         statusCode: 404,
-        body: 'not found',
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': '*',
+          'Access-Control-Allow-Methods': '*',
+        },
+        body: 'channel not found',
       };
     }
   } else {
     return {
-      statusCode: 400,
+      statusCode: 404,
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': '*',
         'Access-Control-Allow-Methods': '*',
       },
-      body: 'no spec: ' + JSON.stringify(event),
+      body: 'path not found',
     };
   }
-};
+}

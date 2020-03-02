@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -f function.zip && zip -r function.zip * && aws lambda update-function-code --function-name tokens --zip-file fileb://function.zip"
+    "build": "rm -f function.zip && zip -r function.zip * && aws lambda update-function-code --function-name discord --zip-file fileb://function.zip"
   },
   "repository": {
     "type": "git",
@@ -18,7 +18,6 @@
   },
   "homepage": "https://github.com/modulesio/exokit-lambda-token#readme",
   "dependencies": {
-    "node-fetch": "^2.6.0",
-    "web3": "^1.2.1"
+    "discord.js": "^12.0.1"
   }
 }
