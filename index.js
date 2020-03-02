@@ -28,6 +28,10 @@ const readyPromise = client.login(discordConfig.token)
     });
   }); */
 
+client.on('error', err => {
+  console.warn(err.stack);
+});
+
 exports.handler = async event => {
   await readyPromise;
   // const {pathname, search} = new URL(request.url);
