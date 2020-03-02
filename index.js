@@ -22,63 +22,46 @@ const discordConfig = {
 };
 const client = new Discord.Client();
 const readyPromise = client.login(discordConfig.token)
-  /* .then(() => {
-    client.channels.find(channel => {
-      console.log('channel: ' + channel.name);
-    });
-  }); */
+  .then(() => client.channels.fetch(discordConfig.channelId));
 
 client.on('error', err => {
   console.warn(err.stack);
 });
 
 exports.handler = async event => {
-  await readyPromise;
+  const channel = await readyPromise;
   // const {pathname, search} = new URL(request.url);
   console.log('got event', event);
-  const {queryStringParameters} = event;
-  const {t, m} = queryStringParameters;
-  if (t === 'post') {
-    // const {m} = parseQuery(search);
-    // const channel = client.channels.find(channel => channel.name === discordConfig.channelId && channel.type === 'text');
-    const channel = await client.channels.fetch(discordConfig.channelId);
-    if (channel) {
-      await channel.send(m);
-      /* if (typeof data.text === 'string') {
-        channel.send(data.text);
-      } else if (typeof data.attachment === 'string') {
-        const filename = data.attachment;
-        if (discordAttachmentBuffer) {
-          channel.send(new Discord.Attachment(discordAttachmentBuffer, filename));
-          discordAttachmentBuffer = null;
-        } else {
-          // console.log('prepare for attachment', data.attachment);
-          discordAttachmentSpec = {
-            channel,
-            filename,
-          };
-        } */
+  let {queryStringParameters: {t}, body, isBase64Encoded} = event;
+  if (isBase64Encoded) {
+    body = Buffer.from(body, 'base64');
+  }
+  if (t === 'postMessage') {
+    await channel.send(body);
+    /* if (typeof data.text === 'string') {
+      channel.send(data.text);
+    } else if (typeof data.attachment === 'string') {
+      const filename = data.attachment;
+      if (discordAttachmentBuffer) {
+        channel.send(new Discord.Attachment(discordAttachmentBuffer, filename));
+        discordAttachmentBuffer = null;
+      } else {
+        // console.log('prepare for attachment', data.attachment);
+        discordAttachmentSpec = {
+          channel,
+          filename,
+        };
+      } */
 
-      return {
-        statusCode: 200,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Headers': '*',
-          'Access-Control-Allow-Methods': '*',
-        },
-        body: 'ok',
-      };
-    } else {
-      return {
-        statusCode: 404,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Headers': '*',
-          'Access-Control-Allow-Methods': '*',
-        },
-        body: 'channel not found',
-      };
-    }
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': '*',
+        'Access-Control-Allow-Methods': '*',
+      },
+      body: 'ok',
+    };
   } else {
     return {
       statusCode: 404,
