@@ -37,7 +37,11 @@ exports.handler = async event => {
     body = Buffer.from(body, 'base64').toString('utf8');
   }
   if (t === 'postMessage') {
-    await channel.send(body);
+    try {
+      await channel.send(body);
+    } catch(err) {
+      console.warn(err.stack);
+    }
     /* if (typeof data.text === 'string') {
       channel.send(data.text);
     } else if (typeof data.attachment === 'string') {
@@ -64,7 +68,11 @@ exports.handler = async event => {
     };
   } else if (t === 'postAttachment') {
     const attachment = new Discord.MessageAttachment(body);
-    await channel.send('', attachment);
+    try {
+      await channel.send('', attachment);
+    } catch(err) {
+      console.warn(err.stack);
+    }
     /* if (typeof data.text === 'string') {
       channel.send(data.text);
     } else if (typeof data.attachment === 'string') {
