@@ -63,7 +63,7 @@ exports.handler = async event => {
       body: 'ok',
     };
   } else if (t === 'postAttachment') {
-    const attachment = new MessageAttachment(body);
+    const attachment = new Discord.MessageAttachment(body);
     await channel.send('', attachment);
     /* if (typeof data.text === 'string') {
       channel.send(data.text);
