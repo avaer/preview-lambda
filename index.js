@@ -9,17 +9,6 @@ const crypto = require('crypto');
 const zlib = require('zlib');
 const child_process = require('child_process');
 
-const AWS = require('aws-sdk');
-const config = require('./config.json');
-const {accessKeyId, secretAccessKey, /*githubUsername, githubApiKey,*/ githubPagesDomain, githubClientId, githubClientSecret, stripeClientId, stripeClientSecret} = config;
-const awsConfig = new AWS.Config({
-  credentials: new AWS.Credentials({
-    accessKeyId,
-    secretAccessKey,
-  }),
-  region: 'us-west-1',
-});
-
 const chromium = require('chrome-aws-lambda');
 
 // const bip32 = require('./bip32.js');
